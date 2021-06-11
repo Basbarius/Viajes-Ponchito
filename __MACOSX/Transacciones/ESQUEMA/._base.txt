@@ -1,0 +1,77 @@
+drop table RESERVAHOTELSIMULADO;
+drop table RESERVAHOTEL;
+drop table SIMULACION;
+drop table RESERVACION;
+drop table CLIENTEREGISTRADO;
+drop table COMIENZA;
+drop table CONFORMADO;
+drop table CIRCUITO;
+drop table FECHACIRCUITO;
+drop table ETAPA;
+drop table HOTEL;
+drop table LUGARAVISITAR;
+drop table CIUDAD;
+
+create table CIUDAD(NOMBRE char(12) NOT NULL, PAIS char(12) NOT NULL, primary key (NOMBRE, PAIS));
+
+create table LUGARAVISITAR(NOMBRE char(12) NOT NULL, CIUDAD char(12) NOT NULL, PAIS char(12) NOT NULL, DIRECCION char(20) NOT NULL, DESCRIPCION char(40), PRECIO int NOT NULL, primary key (NOMBRE), FOREIGN KEY (CIUDAD, PAIS) REFERENCES CIUDAD(NOMBRE, PAIS));
+
+create table CIRCUITO( IDENTIFICADOR char(5) NOT NULL, DESCRIPCION char(40), CIUDADSALIDA char(12) NOT NULL, PAISSALIDA char(12) NOT NULL, CIUDADLLEGADA char(12) NOT NULL, PAISLLEGADA char(12) NOT NULL, DURACION INTEGER(2) NOT NULL, PRECIO INTEGER(7) NOT NULL, PRIMARY KEY (IDENTIFICADOR), FOREIGN KEY(CIUDADSALIDA, PAISSALIDA) REFERENCES CIUDAD(NOMBRE, PAIS), FOREIGN KEY(CIUDADLLEGADA, PAISLLEGADA) REFERENCES CIUDAD(NOMBRE, PAIS));
+
+create table FECHACIRCUITO(IDENTIFICADOR CHAR(5) NOT NULL, FECHASALIDA date NOT NULL, NBPERSONAS integer, primary key (IDENTIFICADOR));
+
+create table ETAPA( IDENTIFICADOR char(5), ORDEN integer, NOMBRELUGAR char(12) NOT NULL, CIUDAD char(12) NOT NULL, PAIS char(12) NOT NULL, DURACION int(2), primary key(IDENTIFICADOR), FOREIGN KEY(NOMBRELUGAR) REFERENCES LUGARAVISITAR(NOMBRE), FOREIGN KEY(CIUDAD, PAIS) REFERENCES CIUDAD(NOMBRE, PAIS));
+
+create table HOTEL( NOMBRE char(12) NOT NULL, CIUDAD char(12) NOT NULL, PAIS char(12) NOT NULL, DIRECCION char(20) NOT NULL, NUMCUARTOS integer NOT NULL, PRECIOCUARTO integer NOT NULL, PRECIODESAYUNO integer, primary key (NOMBRE, DIRECCION), FOREIGN KEY(CIUDAD, PAIS) REFERENCES CIUDAD(NOMBRE, PAIS));
+
+create table CLIENTEREGISTRADO (NOMBRECOMPLETO char(30) NOT NULL, NUMTARJETA bigint(16), CONTRASEÑA char(20), CATEGORIA char(10), AÑOREGISTRO integer NOT NULL, DIRECCION char(20) NOT NULL, TIPOPAGO char(10), primary key (NOMBRECOMPLETO));
+
+create table SIMULACION(CODIGOSIM char(10) NOT NULL, FECHASIM date NOT NULL, FECHALLEGADA date NOT NULL, FECHASALIDA date NOT NULL, NUMPERSONAS integer (3), NOMBRECOMPLETO char(20) NOT NULL, IDENTIFICADORCIRCUITO char(5) NOT NULL, primary key (CODIGOSIM), FOREIGN KEY(IDENTIFICADORCIRCUITO) REFERENCES CIRCUITO(IDENTIFICADOR));
+
+create table RESERVACION( CODIGORESERV char(10) NOT NULL, FECHASIM date NOT NULL, FECHALLEGADA date NOT NULL, FECHASALIDA date NOT NULL, NUMPERSONAS integer(2), NOMBRECOMPLETO char(20), IDENTIFICADORCIRCUITO char(5) NOT NULL, PRIMARY KEY (CODIGORESERV), FOREIGN KEY (NOMBRECOMPLETO) REFERENCES CLIENTEREGISTRADO(NOMBRECOMPLETO), FOREIGN KEY(IDENTIFICADORCIRCUITO) REFERENCES CIRCUITO(IDENTIFICADOR));
+
+create table COMIENZA (IDENTIFICADORCIRCUITO char(5), IDENTIFICADORFECHA char(5), FOREIGN KEY(IDENTIFICADORCIRCUITO) REFERENCES CIRCUITO (IDENTIFICADOR), FOREIGN KEY(IDENTIFICADORFECHA) REFERENCES FECHACIRCUITO (IDENTIFICADOR));
+
+create table CONFORMADO (IDENTIFICADORCIRCUITO char(5), IDENTIFICADORETA char(5), FOREIGN KEY(IDENTIFICADORCIRCUITO) REFERENCES CIRCUITO (IDENTIFICADOR), FOREIGN KEY(IDENTIFICADORETA) REFERENCES ETAPA (IDENTIFICADOR));
+
+create table RESERVAHOTELSIMULADO (nombreHotel char(12), direccion char(20), codigoSim CHAR(10), identificadorEtapa char(5), fechaInicio date NOT NULL, fechaTermino date NOT NULL, numPersonas int(3) not null, PRIMARY KEY(nombreHotel, direccion, codigosim, identificadorEtapa), FOREIGN KEY(nombreHotel, direccion) REFERENCES HOTEL(NOMBRE, DIRECCION), FOREIGN KEY(CODIGOSIM) REFERENCES SIMULACION(CODIGOSIM), FOREIGN KEY(IDENTIFICADORETAPA) REFERENCES ETAPA(IDENTIFICADOR));
+
+create table RESERVAHOTEL (nombreHotel char(12), direccion char(20), codigoRESERV CHAR(10), identificadorEtapa char(5), fechaInicio date NOT NULL, fechaTermino date NOT NULL, numPersonas int(3) not null, PRIMARY KEY(nombreHotel, direccion, codigoRESERV, identificadorEtapa), FOREIGN KEY(nombreHotel, direccion) REFERENCES HOTEL(NOMBRE, DIRECCION), FOREIGN KEY(CODIGORESERV) REFERENCES RESERVACION(CODIGORESERV), FOREIGN KEY(IDENTIFICADORETAPA) REFERENCES ETAPA(IDENTIFICADOR));
+
+insert into CLIENTEREGISTRADO values("Bas Bargagli", NULL, "contraseña", "agencia", 2021, "Saturno 21", "efectivo");
+insert into CLIENTEREGISTRADO values("Juan Perez", 1335456245151324, "contraseña", "individuo", 2021, "Jupiter 38", "tarjeta");
+insert into CIUDAD values("Cuernavaca", "Mexico");
+insert into CIUDAD values("CDMX", "Mexico");
+insert into CIUDAD values("Puebla", "Mexico");
+insert into HOTEL values ("Holiday Inn", "Cuernavaca", "Mexico", "Plan de ayala #21", 100, 1000, 100);
+insert into HOTEL values ("Fiesta Inn", "Cuernavaca", "Mexico", "Domingo Diez #32", 80, 900, 120);
+insert into HOTEL values ("Fiesta Inn", "CDMX", "Mexico", "La roma #35", 160, 1500, 150);
+insert into HOTEL values ("Holiday Inn", "CDMX", "Mexico", "Condesa #21", 100, 1200, 100);
+insert into HOTEL values ("Fiesta Inn", "Puebla", "Mexico", "11 Oriente #17", 120, 1200, 130);
+insert into HOTEL values ("Las americas", "Puebla", "Mexico", "14 Oriente #23", 120, 800, 50);
+insert into LUGARAVISITAR values ("Centro Cu", "Cuernavaca", "Mexico", "Centro historico", "Centro de Cuernavaca", 0);
+insert into LUGARAVISITAR values ("Centro CDMX", "CDMX", "Mexico", "Centro historico", "Centro de CDMX", 0);
+insert into LUGARAVISITAR values ("Bellas artes", "CDMX", "Mexico", "Av Juarez", "Palacio de bellas artes", 100);
+insert into LUGARAVISITAR values ("Chapultepec", "CDMX", "Mexico", "Miguel Hidalgo", "Castillo y bosque de chapultepec", 0);
+insert into LUGARAVISITAR values ("Angelopolis", "Puebla", "Mexico", "Av Angelopolis", "Zona de angelopolis", 0);
+insert into LUGARAVISITAR values ("La estrella", "Puebla", "Mexico", "Av Angelopolis", "La estrella de puebla", 50);
+insert into CIRCUITO values ("BaM81", "Viaje de 5 dias por Cuernavaca y otros", "Cuernavaca", "Mexico", "CDMX", "Mexico", 5, 16038);
+insert into RESERVACION values ("1i3as", '2021-05-14', '2021-06-13', '2021-06-08', 3, "Bas Bargagli", "BaM81"); 
+insert into Fechacircuito values ("03-Ba", '2021-06-08', 3);
+insert into Comienza values("BaM81", "03-Ba");
+insert into Etapa values ("M31Ba", 1, "Centro Cu", "Cuernavaca", "Mexico", 2);
+insert into Etapa values ("M32Ba", 2, "Bellas artes", "CDMX", "Mexico", 3);
+insert into conformado values("BaM81", "M31Ba");
+insert into conformado values("BaM81", "M32Ba");
+insert into reservahotel values("Fiesta Inn", "Domingo Diez #32", "1i3as", "M31Ba", '2021-06-08', '2021-06-10', 3);
+insert into reservahotel values("Holiday Inn", "Condesa #21", "1i3as", "M32Ba", '2021-06-10', '2021-06-13', 3);
+insert into CIRCUITO values ("JuM71", "Viaje de 3 dias por Puebla y otros", "Puebla", "Mexico", "Cuernavaca", "Mexico", 3, 2720);
+insert into RESERVACION values ("1z0ua", '2021-05-14', '2021-07-10', '2021-07-07', 1, "Juan Perez", "JuM71"); 
+insert into Fechacircuito values ("01-Ju", '2021-07-07', 1);
+insert into Comienza values("JuM71", "01-Ju");
+insert into Etapa values ("M11Ju", 1, "Angelopolis", "Puebla", "Mexico", 2);
+insert into Etapa values ("M12Ju", 2, "Centro Cu", "Cuernavaca", "Mexico", 1);
+insert into conformado values("JuM71", "M11Ju");
+insert into conformado values("JuM71", "M12Ju");
+insert into reservahotel values("Fiesta Inn", "Domingo Diez #32", "1z0ua", "M12Ju", '2021-07-09', '2021-07-10', 1);
+insert into reservahotel values("Las americas", "14 Oriente #23", "1z0ua", "M11Ju", '2021-07-07', '2021-07-09', 1);
